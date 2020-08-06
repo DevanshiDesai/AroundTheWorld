@@ -20,7 +20,7 @@ CustPhoneNo VARCHAR(50) NOT NULL,
 CustStreetName VARCHAR(50) NOT NULL,
 CustZipCode VARCHAR(10) NOT NULL,
 CustEmail VARCHAR(50) NOT NULL,
-CustPassword VARCHAR(50) NOT NULL,
+CustPassword varbinary(160) NOT NULL,
 CustAge INT NOT NULL,
 CustGender VARCHAR(10) NOT NULL
 );
@@ -35,7 +35,7 @@ EmpLastName VARCHAR(50) NOT NULL,
 EmpPhoneNumber INT NOT NULL,
 EmpEmailAddress VARCHAR(50) NOT NULL,
 EmpUsername VARCHAR(50) NOT NULL,
-EmpPassword VARCHAR(50) NOT NULL,
+EmpPassword varbinary(160) NOT NULL,
 EmpDesignation VARCHAR(50) NOT NULL,
 EmpSalary FLOAT NOT NULL,
 EmpAvgRating INT
