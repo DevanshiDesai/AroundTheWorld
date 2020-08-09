@@ -1,0 +1,346 @@
+/* Query to Drop Database */
+
+DROP DATABASE Project_Team_12_AroundTheWorld;
+
+/* Query to Create Database */
+
+GO
+CREATE DATABASE Project_Team_12_AroundTheWorld;
+GO
+
+/* Query to use the created Database */
+
+USE Project_Team_12_AroundTheWorld;
+
+/* Query to Drop a Function */
+
+DROP FUNCTION CheckGender;
+
+/* Query to Create a Function */
+
+CREATE FUNCTION CheckGender(@CustomerGender VARCHAR(10))
+RETURNS SMALLINT
+AS
+BEGIN
+DECLARE @Count SMALLINT=0
+SELECT @Count=COUNT(CustGender)
+FROM Customer
+WHERE CustGender=@CustomerGender
+AND CustGender NOT IN('Male','Female','Other')
+RETURN @Count;
+END;
+
+/* Query to Drop Table */
+
+DROP TABLE Customer;
+
+/* Query to Create Customer Entity */
+
+CREATE TABLE Customer
+(
+CustID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+CustFirstName VARCHAR(50) NOT NULL,
+CustLastName VARCHAR(50) NOT NULL,
+CustBirthDate DATE NOT NULL,
+CustPhoneNo VARCHAR(50) NOT NULL,
+CustStreetName VARCHAR(50) NOT NULL,
+CustZipCode VARCHAR(10) NOT NULL,
+CustEmail VARCHAR(50) NOT NULL,
+CustPassword VARBINARY(250) NOT NULL,
+CustGender VARCHAR(10) NOT NULL CONSTRAINT GenderCheck CHECK(dbo.CheckGender(CustGender)=0)
+);
+
+/* Query to Drop a Function */
+
+DROP FUNCTION CheckDesignation;
+
+DROP FUNCTION EmpSalaryCheck;
+
+/* Query to Create a Function */
+
+CREATE FUNCTION CheckDesignation(@EmployeeDesignation VARCHAR(10))
+RETURNS SMALLINT
+AS
+BEGIN
+DECLARE @Count SMALLINT=0
+SELECT @Count=COUNT(EmpDesignation)
+FROM Employee
+WHERE EmpDesignation=@EmployeeDesignation
+AND EmpDesignation NOT IN('Sales Executive', 'Associate Executive', 'Travel Manager', 'Senior Sales Executive')
+RETURN @Count;
+END;
+
+CREATE FUNCTION EmpSalaryCheck(@EmployeeSalary MONEY)
+RETURNS SMALLINT
+AS
+BEGIN
+DECLARE @Count SMALLINT=0
+SELECT @Count=COUNT(EmpSalary)
+FROM Employee
+WHERE EmpSalary=@EmployeeSalary
+AND EmpSalary < 40000
+RETURN @Count;
+END;
+
+/* Query to Drop Table */
+
+DROP TABLE Employee;
+
+/* Query to Create Employee Entity */
+
+CREATE TABLE Employee
+(
+EmployeeID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+EmpFirstName VARCHAR(50) NOT NULL,
+EmpLastName VARCHAR(50) NOT NULL,
+EmpPhoneNumber VARCHAR(50) NOT NULL,
+EmpEmailAddress VARCHAR(50) NOT NULL,
+EmpUsername VARCHAR(50) NOT NULL,
+EmpPassword VARBINARY(250) NOT NULL,
+EmpDesignation VARCHAR(50) NOT NULL CONSTRAINT EmployeeDesignationCheck CHECK(dbo.CheckDesignation(EmpDesignation)=0),
+EmpSalary FLOAT NOT NULL CONSTRAINT EmployeeSalaryCheck CHECK(dbo.EmpSalaryCheck(EmpSalary)=0),
+EmpAvgRating FLOAT
+);
+
+/* Query to Drop Table */
+
+DROP TABLE CustomerPreference;
+
+/* Query to Create CustomerPreference Entity */
+
+CREATE TABLE CustomerPreference
+(
+CustPrefID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+CustID INT NOT NULL FOREIGN KEY REFERENCES Customer(CustID),
+CustBudget MONEY NOT NULL,
+PrefPackageType VARCHAR(50) NOT NULL
+);
+
+/* Query to Drop Table */
+
+DROP TABLE Country;
+
+/* Query to Create Country Entity */
+
+CREATE TABLE Country
+(
+CountryID INT PRIMARY KEY IDENTITY(1, 1),
+CountryName VARCHAR(50) NOT NULL
+);
+
+/* Query to Drop Table */
+
+DROP TABLE Visa;
+
+/* Query to Create Visa Entity */
+
+CREATE TABLE Visa
+(
+VisaID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+CountryID INT NOT NULL FOREIGN KEY REFERENCES Country(CountryID),
+IsVisaRequired BIT NOT NULL,
+VisaCost MONEY
+);
+
+/* Query to Drop a Function */
+
+DROP FUNCTION VisaStatusCheck;
+
+/* Query to Create a Function */
+
+CREATE FUNCTION VisaStatusCheck(@VisaResult VARCHAR(45))
+RETURNS SMALLINT
+AS
+BEGIN
+DECLARE @Count SMALLINT=0
+SELECT @Count=COUNT(VisaOutcome)
+FROM VisaStatus
+WHERE VisaOutcome=@VisaResult
+AND VisaOutcome NOT IN('Accepted','Rejected')
+RETURN @Count;
+END;
+
+/* Query to Drop Table */
+
+DROP TABLE VisaStatus;
+
+/* Query to Create VisaStatus Entity */
+
+CREATE TABLE VisaStatus
+(
+VisaStatusID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+CustID INT NOT NULL FOREIGN KEY REFERENCES Customer(CustID),
+VisaID INT NOT NULL FOREIGN KEY REFERENCES Visa(VisaID),
+VisaOutcome VARCHAR(50) NOT NULL CONSTRAINT VisaResultCheck CHECK(dbo.VisaStatusCheck(VisaOutcome)=0),
+RejectedReason VARCHAR(255),
+VisaDate DATE NOT NULL DEFAULT GETDATE()
+);
+
+/* Query to Drop Table */
+
+DROP TABLE Package;
+
+/* Query to Create Package Entity */
+
+CREATE TABLE Package
+(
+PackageID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+PackageType VARCHAR(50) NOT NULL,
+TotalPackagePrice MONEY NOT NULL,
+TotalNumberOfDays INT NOT NULL,
+);
+
+/* Query to Drop Table */
+
+DROP TABLE Booking;
+
+/* Query to Create Booking Entity */
+
+CREATE TABLE Booking
+(
+BookingID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+PackageID INT NOT NULL FOREIGN KEY REFERENCES Package(PackageID),
+EmployeeID INT NOT NULL FOREIGN KEY REFERENCES Employee(EmployeeID),
+CustID INT NOT NULL FOREIGN KEY REFERENCES Customer(CustID),
+IsLatest BIT NOT NULL,
+BookingStatus VARCHAR(15) NOT NULL,
+TripStartDate DATE NOT NULL DEFAULT GETDATE(),
+TripEndDate DATE NOT NULL DEFAULT GETDATE()
+);
+
+/* Query to Drop Table */
+
+DROP TABLE Payment;
+
+/* Query to Create Payment Entity */
+
+CREATE TABLE Payment
+(
+PaymentID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+BookingID INT NOT NULL FOREIGN KEY REFERENCES Booking(BookingID),
+Discount MONEY,
+FinalAmount MONEY NOT NULL,
+PaymentStatus BIT NOT NULL,
+PaymentDate DATETIME NOT NULL DEFAULT GETDATE()
+);
+
+/* Query to Drop Table */
+
+DROP TABLE CustomerFeedback;
+
+/* Query to Create CustomerFeedback Entity */
+
+CREATE TABLE CustomerFeedback
+(
+BookingID INT NOT NULL FOREIGN KEY REFERENCES Booking(BookingID),
+CustomerRating INT,
+FeedbackDescription VARCHAR(255)
+CONSTRAINT PKCustomerFeedback PRIMARY KEY CLUSTERED
+(BookingID)
+);
+
+/* Query to Drop Table */
+
+DROP TABLE City;
+
+/* Query to Create City Entity */
+
+CREATE TABLE City
+(
+CityID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+CountryID INT NOT NULL FOREIGN KEY REFERENCES Country(CountryID),
+CityName VARCHAR(50) NOT NULL
+);
+
+/* Query to Drop Table */
+
+DROP TABLE CustPreferredCity;
+
+/* Query to Create CustPreferredCity Entity */
+
+CREATE TABLE CustPreferredCity 
+(
+CustPrefID INT NOT NULL FOREIGN KEY REFERENCES CustomerPreference(CustPrefID),
+CityID INT NOT NULL FOREIGN KEY REFERENCES City(CityID)
+CONSTRAINT PKCustPreferredCity PRIMARY KEY CLUSTERED
+(CustPrefID, CityID)
+);
+
+/* Query to Drop Table */
+
+DROP TABLE Transport;
+
+/* Query to Create Transport Entity */
+
+CREATE TABLE Transport
+(
+TransportID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+ArrivalCityID INT NOT NULL FOREIGN KEY REFERENCES City(CityID),
+DepartureCityID INT NOT NULL FOREIGN KEY REFERENCES City(CityID),
+TravelMode VARCHAR(50) NOT NULL,
+TransportPrice MONEY NOT NULL,
+);
+
+/* Query to Drop Table */
+
+DROP TABLE Attraction;
+
+/* Query to Create Attraction Entity */
+
+CREATE TABLE Attraction
+(
+AttractionID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+AttractionName VARCHAR(50) NOT NULL,
+AttractionPrice MONEY NOT NULL
+);
+
+/* Query to Drop Table */
+
+DROP TABLE Accommodation;
+
+/* Query to Create Accommodation Entity */
+
+CREATE TABLE Accommodation
+(
+AccommodationID INT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+AccommodationType VARCHAR(50) NOT NULL,
+AccommodationName VARCHAR(50) NOT NULL,
+AccommodationPrice MONEY NOT NULL,
+AccommodationRating INT NOT NULL,
+AccommodationStreetName VARCHAR(50) NOT NULL,
+AccommodationZipCode VARCHAR(10) NOT NULL
+);
+
+/* Query to Drop Table */
+
+DROP TABLE PackageDetails;
+
+/* Query to Create PackageDetails Entity */
+
+CREATE TABLE PackageDetails
+(
+PackageID INT NOT NULL FOREIGN KEY REFERENCES Package(PackageID),
+AttractionID INT NOT NULL FOREIGN KEY REFERENCES Attraction(AttractionID),
+AccommodationID INT NOT NULL FOREIGN KEY REFERENCES Accommodation(AccommodationID),
+TransportID INT NOT NULL FOREIGN KEY REFERENCES Transport(TransportID),
+CityID INT NOT NULL FOREIGN KEY REFERENCES City(CityID)
+CONSTRAINT PKPackageDetails PRIMARY KEY CLUSTERED
+(PackageID, AttractionID, AccommodationID, TransportID, CityID)
+);
+
+/* Query to Drop Table */
+
+DROP TABLE Flight;
+
+/* Query to Create Flight Entity */
+
+CREATE TABLE Flight
+(
+TransportID INT NOT NULL FOREIGN KEY REFERENCES Transport(TransportID),
+IsLatest BIT,
+FlightPrice MONEY,
+LastUpdated DATETIME DEFAULT GETDATE()
+CONSTRAINT PKFlight PRIMARY KEY CLUSTERED
+(TransportID)
+);
+
