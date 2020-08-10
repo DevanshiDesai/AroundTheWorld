@@ -1,3 +1,6 @@
+*.sql linguist-detectable=true
+*.sql linguist-language=SQL
+
 /* Use the below mentioned Database */
 
 USE Project_Team_12_AroundTheWorld;
