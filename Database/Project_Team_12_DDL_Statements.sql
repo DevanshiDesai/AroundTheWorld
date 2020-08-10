@@ -1,4 +1,5 @@
 *.sql linguist-detectable=true
+*.sql linguist-language=SQL
 
 /* Query to Create Database */
 
