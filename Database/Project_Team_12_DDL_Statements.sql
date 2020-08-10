@@ -1,3 +1,5 @@
+*.sql linguist-detectable=true
+
 /* Query to Create Database */
 
 GO
