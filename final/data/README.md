@@ -1,1 +1,2 @@
-All DDL and DML files
+-- All DDL and DML files
+-- Database: MS SQL Server
