@@ -1,6 +1,3 @@
-*.sql linguist-detectable=true
-*.sql linguist-language=SQL
-
 /* Query to Create Database */
 
 GO
@@ -308,11 +305,12 @@ AFTER INSERT
 AS
 BEGIN
 UPDATE Employee set EmpAvgRating = (SELECT temp.avgRating
-FROM (SELECT AVG(CAST(CustomerRating as float)) as avgRating  FROM CustomerFeedback c
+FROM (SELECT b.EmployeeID,AVG(CAST(CustomerRating AS FLOAT)) as avgRating  FROM CustomerFeedback c
 JOIN Booking b
 ON c.BookingID = b.Bookingid
 JOIN Employee e
-ON b.EmployeeID = e.EmployeeID ) temp)
+ON b.EmployeeID = e.EmployeeID GROUP BY b.EmployeeID  ) temp 
+WHERE temp.EmployeeID=(SELECT EMPLOYEEID From Booking B Inner join Inserted i on b.BookingID=i.BookingID ))
 WHERE EmployeeID = (SELECT e.EmployeeID
 FROM CustomerFeedback c
 JOIN Booking b
@@ -320,6 +318,12 @@ on c.Bookingid = b.Bookingid
 JOIN Employee e
 ON b.Employeeid = e.Employeeid WHERE c.BookingID = (SELECT BookingID FROM Inserted))
 END;
+
+
+
+AVG(CAST(CustomerRating as float)) as avgRating
+
+
 
 -- View to create a temporary Flight Details table from the Transport table
 
